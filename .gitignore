@@ -1,0 +1,45 @@
+# =========================
+# IntelliJ IDEA files
+# =========================
+.idea/
+*.iml
+
+# =========================
+# Build / compiled files
+# =========================
+out/
+bin/
+target/
+build/
+*.class
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Temporary files
+# =========================
+*.tmp
+*.swp
+
+# =========================
+# Eclipse (optional cleanup)
+# =========================
+.metadata/
+
+# =========================
+# DO NOT IGNORE THESE
+# =========================
+# (Keep these in your repo)
+# src/
+# lib/
+# .project
+# .classpath
