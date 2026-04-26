@@ -48,6 +48,11 @@ public class ServicePoint {
 				Clock.getInstance().getTime() + serviceTime
 		));
 	}
+
+	// Allows changing service time distribution later from GUI/input
+	// public void setGenerator(ContinuousGenerator generator) {
+		//this.generator = generator;}
+
 	public boolean isReserved(){
 
 		return reserved;
@@ -56,4 +61,7 @@ public class ServicePoint {
 	public boolean isOnQueue() {
 		return jono.size() != 0;
 	}
+	// Added for statistics / GUI display
+	// public int getQueueLength() {
+		//return jono.size();}
 }

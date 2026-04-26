@@ -10,10 +10,9 @@ public enum EventType implements IEventType {
 	DEP_PRODUCE,
 	DEP_DAIRY,
 	DEP_GROCERY,
-	DEP_BEVERAGE,
+	DEP_BEVERAGES,
 
 	//checkout areas
 	DEP_REGULAR_CHECKOUT,
-	DEP_SELF_CHECKOUT,
-
+	DEP_SELF_CHECKOUT
 }

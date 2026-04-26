@@ -8,63 +8,137 @@ import simu.framework.Clock;
 import simu.framework.Engine;
 import simu.framework.Event;
 
-
 public class MyEngine extends Engine {
-	private ArrivalProcess arrivalProcess;
 
-	public MyEngine(IControllerMtoV controller){ // NEW
-		super(controller); // NEW
-		
-		servicePoints = new ServicePoint[3];
-	
-		servicePoints[0]=new ServicePoint(new Normal(10,6), eventList, EventType.DEP1);
-		servicePoints[1]=new ServicePoint(new Normal(10,10), eventList, EventType.DEP2);
-		servicePoints[2]=new ServicePoint(new Normal(5,3), eventList, EventType.DEP3);
-		
-		arrivalProcess = new ArrivalProcess(new Negexp(15,5), eventList, EventType.ARR1);
+	private final ArrivalProcess arrivalProcess;
+
+	private final ServicePoint produceSP;
+	private final ServicePoint dairySP;
+	private final ServicePoint grocerySP;
+	private final ServicePoint beveragesSP;
+	private final ServicePoint regularCheckoutSP;
+	private final ServicePoint selfCheckoutSP;
+
+	public MyEngine(IControllerMtoV controller) {
+		super(controller);
+
+		servicePoints = new ServicePoint[6];
+
+		produceSP = new ServicePoint(new Normal(8, 2), eventList, EventType.DEP_PRODUCE);
+		dairySP = new ServicePoint(new Normal(6, 2), eventList, EventType.DEP_DAIRY);
+		grocerySP = new ServicePoint(new Normal(10, 3), eventList, EventType.DEP_GROCERY);
+		beveragesSP = new ServicePoint(new Normal(7, 2), eventList, EventType.DEP_BEVERAGES);
+
+		regularCheckoutSP = new ServicePoint(new Normal(6, 2), eventList, EventType.DEP_REGULAR_CHECKOUT);
+		selfCheckoutSP = new ServicePoint(new Normal(4, 1), eventList, EventType.DEP_SELF_CHECKOUT);
+
+		servicePoints[0] = produceSP;
+		servicePoints[1] = dairySP;
+		servicePoints[2] = grocerySP;
+		servicePoints[3] = beveragesSP;
+		servicePoints[4] = regularCheckoutSP;
+		servicePoints[5] = selfCheckoutSP;
+
+		arrivalProcess = new ArrivalProcess(new Negexp(15, 5), eventList, EventType.ARR1);
 	}
 
 	@Override
 	protected void initialization() {
-		arrivalProcess.generateNext();	 // First arrival in the system
+		arrivalProcess.generateNext();
 	}
 
 	@Override
-	protected void runEvent(Event t) {  // B phase events
+	protected void runEvent(Event t) {
 		Customer a;
 
-		switch ((EventType)t.getType()){
-		case ARR1:
-			servicePoints[0].addQueue(new Customer());
-			arrivalProcess.generateNext();
-			controller.visualiseCustomer(); // NEW
-			break;
+		switch ((EventType) t.getType()) {
 
-		case DEP1:
-			a = servicePoints[0].removeQueue();
-			 servicePoints[1].addQueue(a);
-			break;
+			case ARR1:
+				a = new Customer();
+				a.setShoppingStartTime(Clock.getInstance().getTime());
 
-		case DEP2:
-			a = servicePoints[1].removeQueue();
-			servicePoints[2].addQueue(a);
-			break;
+				int route = (int) (Math.random() * 4);
 
-		case DEP3:
-			a = servicePoints[2].removeQueue();
-			a.setRemovalTime(Clock.getInstance().getTime());
-			a.reportResults();
-			break;
-		}	
+				if (route == 0) {
+					produceSP.addQueue(a);
+					if (!produceSP.isReserved()) produceSP.beginService();
+				} else if (route == 1) {
+					dairySP.addQueue(a);
+					if (!dairySP.isReserved()) dairySP.beginService();
+				} else if (route == 2) {
+					grocerySP.addQueue(a);
+					if (!grocerySP.isReserved()) grocerySP.beginService();
+				} else {
+					beveragesSP.addQueue(a);
+					if (!beveragesSP.isReserved()) beveragesSP.beginService();
+				}
+
+				arrivalProcess.generateNext();
+				controller.visualiseCustomer();
+				break;
+
+			case DEP_PRODUCE:
+				a = produceSP.removeQueue();
+				a.setShoppingEndTime(Clock.getInstance().getTime());
+				routeToCheckout(a);
+				if (produceSP.isOnQueue()) produceSP.beginService();
+				break;
+
+			case DEP_DAIRY:
+				a = dairySP.removeQueue();
+				a.setShoppingEndTime(Clock.getInstance().getTime());
+				routeToCheckout(a);
+				if (dairySP.isOnQueue()) dairySP.beginService();
+				break;
+
+			case DEP_GROCERY:
+				a = grocerySP.removeQueue();
+				a.setShoppingEndTime(Clock.getInstance().getTime());
+				routeToCheckout(a);
+				if (grocerySP.isOnQueue()) grocerySP.beginService();
+				break;
+
+			case DEP_BEVERAGES:
+				a = beveragesSP.removeQueue();
+				a.setShoppingEndTime(Clock.getInstance().getTime());
+				routeToCheckout(a);
+				if (beveragesSP.isOnQueue()) beveragesSP.beginService();
+				break;
+
+			case DEP_REGULAR_CHECKOUT:
+				a = regularCheckoutSP.removeQueue();
+				a.setCheckoutEndTime(Clock.getInstance().getTime());
+				a.reportPaymentSuccessful();
+				a.reportResults();
+
+				if (regularCheckoutSP.isOnQueue()) regularCheckoutSP.beginService();
+				break;
+
+			case DEP_SELF_CHECKOUT:
+				a = selfCheckoutSP.removeQueue();
+				a.setCheckoutEndTime(Clock.getInstance().getTime());
+				a.reportPaymentSuccessful();
+				a.reportResults();
+
+				if (selfCheckoutSP.isOnQueue()) selfCheckoutSP.beginService();
+				break;
+		}
+	}
+
+	private void routeToCheckout(Customer a) {
+		a.setCheckoutStartTime(Clock.getInstance().getTime());
+
+		if (a.getItemCount() <= 10) {
+			selfCheckoutSP.addQueue(a);
+			if (!selfCheckoutSP.isReserved()) selfCheckoutSP.beginService();
+		} else {
+			regularCheckoutSP.addQueue(a);
+			if (!regularCheckoutSP.isReserved()) regularCheckoutSP.beginService();
+		}
 	}
 
 	@Override
 	protected void results() {
-		// OLD text UI
-		//System.out.println("Simulation ended at " + Clock.getInstance().getClock());
-		//System.out.println("Results ... are currently missing");
-
-		// NEW GUI
 		controller.showEndTime(Clock.getInstance().getTime());
 	}
 }
