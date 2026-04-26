@@ -7,15 +7,14 @@ import simu.framework.EventList;
 
 import java.util.LinkedList;
 
-// TODO:
-// Service Point functionalities & calculations (+ variables needed) and reporting to be implemented
 public class ServicePoint {
-	private LinkedList<Customer> jono = new LinkedList<Customer>(); // Data Structure used
-	private ContinuousGenerator generator;
-	private EventList eventList;
-	private EventType eventTypeScheduled;
-	//Queuestrategy strategy; // option: ordering of the customer
-	private boolean reserved = false;
+
+	private final LinkedList<Customer> jono = new LinkedList<Customer>(); // Data Structure used
+	private final ContinuousGenerator generator;   // Service time distribution
+	private final EventList eventList;   // Event list where the next departure event is added
+	private final EventType eventTypeScheduled;  // Departure event type for this service point
+
+	private boolean reserved = false;     // True when this service point is busy
 
 	public ServicePoint(ContinuousGenerator generator, EventList tapahtumalista, EventType tyyppi){
 		this.eventList = tapahtumalista;
@@ -23,27 +22,38 @@ public class ServicePoint {
 		this.eventTypeScheduled = tyyppi;
 				
 	}
-
-	public void addQueue(Customer a){   // First customer at the queue is always on the service
-		jono.add(a);
+	// Add customer to the queue
+	public void addQueue(Customer customer) {
+		jono.add(customer);
 	}
 
-	public Customer removeQueue(){		// Remove serviced customer
+	// Remove serviced customer
+	public Customer removeQueue(){
 		reserved = false;
 		return jono.poll();
 	}
 
-	public void beginService() {  		// Begins a new service, customer is on the queue during the service
+	// Start service for the first customer in the queue
+	public void beginService() {
 		reserved = true;
-		double serviceTime = generator.sample();
-		eventList.add(new Event(eventTypeScheduled, Clock.getInstance().getTime()+serviceTime));
-	}
 
+		double serviceTime = generator.sample();
+
+		// Prevent negative service time if Normal distribution gives negative value
+		if (serviceTime < 0) {
+			serviceTime = 0;
+		}
+		eventList.add(new Event(
+				eventTypeScheduled,
+				Clock.getInstance().getTime() + serviceTime
+		));
+	}
 	public boolean isReserved(){
+
 		return reserved;
 	}
-
-	public boolean isOnQueue(){
+	// Check if there are customers in queue
+	public boolean isOnQueue() {
 		return jono.size() != 0;
 	}
 }
