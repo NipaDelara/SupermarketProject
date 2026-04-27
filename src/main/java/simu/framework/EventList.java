@@ -3,7 +3,7 @@ package simu.framework;
 import java.util.PriorityQueue;
 
 public class EventList {
-	private PriorityQueue<Event> lista = new PriorityQueue<Event>();
+	private final PriorityQueue<Event> lista = new PriorityQueue<Event>();
 	
 	public EventList() {
 	}

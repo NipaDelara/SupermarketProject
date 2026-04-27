@@ -3,9 +3,9 @@ import eduni.distributions.*;
 import simu.model.EventType;
 
 public class ArrivalProcess {
-	private ContinuousGenerator generator;
-	private EventList eventList;
-	private EventType type;
+	private final ContinuousGenerator generator;
+	private final EventList eventList;
+	private final EventType type;
 
 	public ArrivalProcess(ContinuousGenerator g, EventList tl, EventType type) {
 		this.generator = g;

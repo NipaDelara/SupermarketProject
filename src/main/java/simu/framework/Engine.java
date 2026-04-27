@@ -6,7 +6,7 @@ import simu.model.ServicePoint;
 public abstract class Engine extends Thread implements IEngine {  // NEW DEFINITIONS
 	private double simulationTime = 0;	// time when the simulation will be stopped
 	private long delay = 0;
-	private Clock clock;				// in order to simplify the code (clock.getClock() instead Clock.getInstance().getClock())
+	private final Clock clock;				// in order to simplify the code (clock.getClock() instead Clock.getInstance().getClock())
 	
 	protected EventList eventList;
 	protected ServicePoint[] servicePoints;

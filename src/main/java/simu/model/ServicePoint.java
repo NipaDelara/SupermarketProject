@@ -59,9 +59,10 @@ public class ServicePoint {
 	}
 	// Check if there are customers in queue
 	public boolean isOnQueue() {
+
 		return jono.size() != 0;
 	}
 	// Added for statistics / GUI display
-	// public int getQueueLength() {
-		//return jono.size();}
+	public int getQueueLength() {
+		return jono.size();}
 }
