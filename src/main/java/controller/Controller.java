@@ -7,9 +7,10 @@ import view.ISimulatorUI;
 
 public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 	private IEngine engine;
-	private ISimulatorUI ui;
-	
+	private final ISimulatorUI ui;
+
 	public Controller(ISimulatorUI ui) {
+
 		this.ui = ui;
 	}
 
@@ -19,19 +20,36 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 		engine = new MyEngine(this); // new Engine thread is created for every simulation
 		engine.setSimulationTime(ui.getTime());
 		engine.setDelay(ui.getDelay());
+
 		ui.getVisualisation().clearDisplay();
 		((Thread) engine).start();
 		//((Thread)engine).run(); // Never like this, why?
 	}
-	
+
 	@Override
-	public void decreaseSpeed() { // hidastetaan moottorisäiettä
-		engine.setDelay((long)(engine.getDelay()*1.10));
+	public void decreaseSpeed() { //  // Slow down simulation: increase delay
+
+		if (engine != null) {
+			long newDelay = (long) (engine.getDelay() * 1.10);
+
+			// Maximum delay limit
+			engine.setDelay(Math.min(newDelay, 2000));
+
+			System.out.println("Slow down -> delay: " + engine.getDelay());
+		}
 	}
 
 	@Override
-	public void increaseSpeed() { // nopeutetaan moottorisäiettä
-		engine.setDelay((long)(engine.getDelay()*0.9));
+	public void increaseSpeed() {  // Speed up simulation: decrease delay
+
+		if (engine != null) {
+			long newDelay = (long) (engine.getDelay() * 0.90);
+
+			// Minimum delay limit
+			engine.setDelay(Math.max(newDelay, 10));
+
+			System.out.println("Speed up -> delay: " + engine.getDelay());
+		}
 	}
 
 
