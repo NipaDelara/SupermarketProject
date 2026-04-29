@@ -1,8 +1,10 @@
 package simu.model;
 
 import controller.IControllerMtoV;
+import eduni.distributions.ContinuousGenerator;
 import eduni.distributions.Negexp;
 import eduni.distributions.Normal;
+import eduni.distributions.Uniform;
 import simu.framework.ArrivalProcess;
 import simu.framework.Clock;
 import simu.framework.Engine;
@@ -40,6 +42,22 @@ public class MyEngine extends Engine {
 		servicePoints[5] = selfCheckoutSP;
 
 		arrivalProcess = new ArrivalProcess(new Negexp(15, 5), eventList, EventType.ARR1);
+	}
+
+	public void setServicePointDistribution(int idx, String distType, double... params) {
+		if (idx < 0 || idx >= servicePoints.length) return;
+
+		ContinuousGenerator newGen = createGenerator(distType, params);
+		servicePoints[idx].setGenerator(newGen);
+	}
+
+	private ContinuousGenerator createGenerator(String type, double... params) {
+        return switch (type.toLowerCase()) {
+            case "negexp" -> new Negexp(params[0]);
+            case "normal" -> new Normal(params[0], params[1]);
+            case "uniform" -> new Uniform(params[0], params[1]);
+            default -> new Negexp(10); // fallback
+        };
 	}
 
 	@Override

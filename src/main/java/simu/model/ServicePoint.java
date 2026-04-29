@@ -10,7 +10,7 @@ import java.util.LinkedList;
 public class ServicePoint {
 
 	private final LinkedList<Customer> jono = new LinkedList<Customer>(); // Data Structure used
-	private final ContinuousGenerator generator;   // Service time distribution
+	private ContinuousGenerator generator;   // Service time distribution
 	private final EventList eventList;   // Event list where the next departure event is added
 	private final EventType eventTypeScheduled;  // Departure event type for this service point
 
@@ -50,8 +50,10 @@ public class ServicePoint {
 	}
 
 	// Allows changing service time distribution later from GUI/input
-	// public void setGenerator(ContinuousGenerator generator) {
-		//this.generator = generator;}
+	public void setGenerator(ContinuousGenerator generator) {
+		this.generator = generator;}
+
+
 
 	public boolean isReserved(){
 
