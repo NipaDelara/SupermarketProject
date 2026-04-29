@@ -40,6 +40,10 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
 	private IVisualisation display;
 
 
+	private Button pauseButton;
+	private Button resumeButton;
+	private Button stepButton;
+
 	@Override
 	public void init() {
 		Trace.setTraceLevel(Level.INFO);
@@ -55,7 +59,7 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
                 System.exit(0);
             });
 
-			primaryStage.setTitle("Simulator");
+			primaryStage.setTitle(	"Simulator");
 
 			startButton = new Button();
 			startButton.setText("Start simulation");
@@ -71,6 +75,17 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
 			speedUpButton = new Button();
 			speedUpButton.setText("Speed up");
 			speedUpButton.setOnAction(e -> controller.increaseSpeed());
+
+
+			pauseButton = new Button("Pause");
+			pauseButton.setOnAction(e -> controller.pauseSimulation());
+
+			resumeButton = new Button("Resume");
+			resumeButton.setOnAction(e -> controller.resumeSimulation());
+
+			stepButton = new Button("Step");
+			stepButton.setOnAction(e -> controller.stepSimulation());
+
 
 			timeLabel = new Label("Simulation time:");
 			timeLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
@@ -108,6 +123,9 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
 	        grid.add(startButton,0, 3);
 	        grid.add(speedUpButton, 0, 4);
 	        grid.add(slowButton, 1, 4);
+			grid.add(pauseButton, 0, 5);
+			grid.add(resumeButton, 1, 5);
+			grid.add(stepButton, 0, 6);
 	        
 	        display = new Visualisation2(400,200);
 			//display = new Visualisation2(400,200);

@@ -5,4 +5,11 @@ public interface IControllerVtoM {
 		public void startSimulation();
 		public void increaseSpeed();
 		public void decreaseSpeed();
+
+    // Override methods for pause,resume and step
+    void pauseSimulation();
+
+	void resumeSimulation();
+
+	void stepSimulation();
 }

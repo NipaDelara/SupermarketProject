@@ -6,7 +6,15 @@ import simu.model.ServicePoint;
 public abstract class Engine extends Thread implements IEngine {  // NEW DEFINITIONS
 	private double simulationTime = 0;	// time when the simulation will be stopped
 	private long delay = 0;
-	private final Clock clock;				// in order to simplify the code (clock.getClock() instead Clock.getInstance().getClock())
+	private final Clock clock;
+
+	// for pausing and stepping through the simulation
+	private volatile boolean running = true;
+	private volatile boolean paused = false;
+	private volatile boolean stepMode = false;
+	private final Object pauseLock = new Object();
+
+	// in order to simplify the code (clock.getClock() instead Clock.getInstance().getClock())
 	
 	protected EventList eventList;
 	protected ServicePoint[] servicePoints;
@@ -38,7 +46,23 @@ public abstract class Engine extends Thread implements IEngine {  // NEW DEFINIT
 	public void run() {
 		initialization(); // creating, e.g., the first event
 
-		while (simulate()){
+		while (running && simulate()){
+			// --- PAUSE CONTROL ---
+			synchronized (pauseLock) {
+				while (paused && !stepMode) {
+					try {
+						pauseLock.wait();
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				}
+				if (stepMode){
+					stepMode = false;
+					paused = true;
+				}
+			}
+			// __ PAUSE CONTROL End __
+
 			delay(); // NEW
 			clock.setTime(currentTime());
 			runBEvents();
@@ -47,7 +71,26 @@ public abstract class Engine extends Thread implements IEngine {  // NEW DEFINIT
 
 		results();
 	}
-	
+
+	// Override for pausing and stepping through the simulation
+	@Override
+	public void pauseSimulation() {
+		paused = true;
+	}
+	@Override
+	public void resumeSimulation() {
+		paused = false;
+		synchronized (pauseLock) {
+			pauseLock.notifyAll();
+		}
+	}
+	@Override
+	public void stepSimulation() {
+		running = false;
+		resumeSimulation();
+	}
+
+
 	private void runBEvents() {
 		while (eventList.getNextTime() == clock.getTime()){
 			runEvent(eventList.remove());

@@ -65,4 +65,26 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 	public void visualiseCustomer() {
 		Platform.runLater(() -> ui.getVisualisation().newCustomer());
 	}
+
+	// Override methods for pause,resume and step
+	@Override
+	public void pauseSimulation() {
+		if (engine != null) {
+			engine.pauseSimulation();
+		}
+	}
+
+	@Override
+	public void resumeSimulation() {
+		if (engine != null) {
+			engine.resumeSimulation();
+		}
+	}
+
+	@Override
+	public void stepSimulation() {
+		if (engine != null) {
+			engine.stepSimulation();
+		}
+	}
 }
