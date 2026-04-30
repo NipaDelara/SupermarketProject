@@ -128,6 +128,7 @@ public class MyEngine extends Engine {
 				a.setCheckoutEndTime(Clock.getInstance().getTime());
 				a.reportPaymentSuccessful();
 				a.reportResults();
+				controller.visualiseCustomerLeft(true);   // notify View
 
 				if (regularCheckoutSP.isOnQueue()) regularCheckoutSP.beginService();
 				break;
@@ -137,6 +138,7 @@ public class MyEngine extends Engine {
 				a.setCheckoutEndTime(Clock.getInstance().getTime());
 				a.reportPaymentSuccessful();
 				a.reportResults();
+				controller.visualiseCustomerLeft(false);  // notify View
 
 				if (selfCheckoutSP.isOnQueue()) selfCheckoutSP.beginService();
 				break;
@@ -148,9 +150,11 @@ public class MyEngine extends Engine {
 
 		if (a.getItemCount() <= 10) {
 			selfCheckoutSP.addQueue(a);
+			controller.visualiseCustomerToCheckout(false);   // false = self
 			if (!selfCheckoutSP.isReserved()) selfCheckoutSP.beginService();
 		} else {
 			regularCheckoutSP.addQueue(a);
+			controller.visualiseCustomerToCheckout(true);    // true = regular
 			if (!regularCheckoutSP.isReserved()) regularCheckoutSP.beginService();
 		}
 	}

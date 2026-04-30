@@ -65,4 +65,18 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 	public void visualiseCustomer() {
 		Platform.runLater(() -> ui.getVisualisation().newCustomer());
 	}
+
+	/* --- View additions (Noel) ---
+	 * Engine pushes finer-grained customer flow events; we forward them to
+	 * the visualisation so queues actually get drawn.
+	 */
+	@Override
+	public void visualiseCustomerToCheckout(boolean regular) {
+		Platform.runLater(() -> ui.getVisualisation().customerToCheckout(regular));
+	}
+
+	@Override
+	public void visualiseCustomerLeft(boolean regular) {
+		Platform.runLater(() -> ui.getVisualisation().customerLeft(regular));
+	}
 }
