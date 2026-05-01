@@ -3,6 +3,7 @@ package controller;
 import javafx.application.Platform;
 import simu.framework.IEngine;
 import simu.model.MyEngine;
+import simu.model.SimulationConfig;
 import view.ISimulatorUI;
 
 public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
@@ -15,15 +16,14 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 	}
 
 	/* Engine control: */
+
 	@Override
-	public void startSimulation() {
-		engine = new MyEngine(this); // new Engine thread is created for every simulation
+	public void startSimulation(SimulationConfig config) {
+		engine = new MyEngine(this, config);  // pass config
 		engine.setSimulationTime(ui.getTime());
 		engine.setDelay(ui.getDelay());
-
 		ui.getVisualisation().clearDisplay();
 		((Thread) engine).start();
-		//((Thread)engine).run(); // Never like this, why?
 	}
 
 	@Override

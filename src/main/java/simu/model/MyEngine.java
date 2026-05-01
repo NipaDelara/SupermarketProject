@@ -13,7 +13,7 @@ import simu.framework.Event;
 public class MyEngine extends Engine {
 
 	private final ArrivalProcess arrivalProcess;
-
+	private final SimulationConfig config;
 	private final ServicePoint produceSP;
 	private final ServicePoint dairySP;
 	private final ServicePoint grocerySP;
@@ -21,27 +21,38 @@ public class MyEngine extends Engine {
 	private final ServicePoint regularCheckoutSP;
 	private final ServicePoint selfCheckoutSP;
 
-	public MyEngine(IControllerMtoV controller) {
+	public MyEngine(IControllerMtoV controller, SimulationConfig config	) {
 		super(controller);
+		this.config = config;
 
-		servicePoints = new ServicePoint[6];
+		// Create distributions using config values
+		ContinuousGenerator produceGen = createGenerator(config.shoppingDistType,
+				config.produceMean, config.produceStd);
+		ContinuousGenerator dairyGen = createGenerator(config.shoppingDistType,
+				config.dairyMean, config.dairyStd);
+		ContinuousGenerator groceryGen = createGenerator(config.shoppingDistType,
+				config.groceryMean, config.groceryStd);
+		ContinuousGenerator beveragesGen = createGenerator(config.shoppingDistType,
+				config.beveragesMean, config.beveragesStd);
+		ContinuousGenerator regularGen = createGenerator(config.shoppingDistType,
+				config.regularCheckoutMean, config.regularCheckoutStd);
+		ContinuousGenerator selfGen = createGenerator(config.shoppingDistType,
+				config.selfCheckoutMean, config.selfCheckoutStd);
 
-		produceSP = new ServicePoint(new Normal(8, 2), eventList, EventType.DEP_PRODUCE);
-		dairySP = new ServicePoint(new Normal(6, 2), eventList, EventType.DEP_DAIRY);
-		grocerySP = new ServicePoint(new Normal(10, 3), eventList, EventType.DEP_GROCERY);
-		beveragesSP = new ServicePoint(new Normal(7, 2), eventList, EventType.DEP_BEVERAGES);
 
-		regularCheckoutSP = new ServicePoint(new Normal(6, 2), eventList, EventType.DEP_REGULAR_CHECKOUT);
-		selfCheckoutSP = new ServicePoint(new Normal(4, 1), eventList, EventType.DEP_SELF_CHECKOUT);
+		produceSP = new ServicePoint(produceGen, eventList, EventType.DEP_PRODUCE);
+		dairySP = new ServicePoint(dairyGen, eventList, EventType.DEP_DAIRY);
+		grocerySP = new ServicePoint(groceryGen, eventList, EventType.DEP_GROCERY);
+		beveragesSP = new ServicePoint(beveragesGen, eventList, EventType.DEP_BEVERAGES);
+		regularCheckoutSP = new ServicePoint(regularGen, eventList, EventType.DEP_REGULAR_CHECKOUT);
+		selfCheckoutSP = new ServicePoint(selfGen, eventList, EventType.DEP_SELF_CHECKOUT);
 
-		servicePoints[0] = produceSP;
-		servicePoints[1] = dairySP;
-		servicePoints[2] = grocerySP;
-		servicePoints[3] = beveragesSP;
-		servicePoints[4] = regularCheckoutSP;
-		servicePoints[5] = selfCheckoutSP;
+		servicePoints = new ServicePoint[]{produceSP, dairySP, grocerySP, beveragesSP,
+				regularCheckoutSP, selfCheckoutSP};
 
-		arrivalProcess = new ArrivalProcess(new Negexp(15, 5), eventList, EventType.ARR1);
+		ContinuousGenerator arrivalGen = createGenerator(config.arrivalDistType,
+				config.arrivalMean, config.arrivalStd);
+		arrivalProcess = new ArrivalProcess(arrivalGen, eventList, EventType.ARR1);
 	}
 
 	public void setServicePointDistribution(int idx, String distType, double... params) {
@@ -70,20 +81,20 @@ public class MyEngine extends Engine {
 		Customer a;
 
 		switch ((EventType) t.getType()) {
-
 			case ARR1:
-				a = new Customer();
+				// Create new customer with item count based on config
+				a = new Customer(config);
 				a.setShoppingStartTime(Clock.getInstance().getTime());
 
-				int route = (int) (Math.random() * 4);
-
-				if (route == 0) {
+				// Choose shopping area using config probabilities
+				double rand = Math.random();
+				if (rand < config.probProduce) {
 					produceSP.addQueue(a);
 					if (!produceSP.isReserved()) produceSP.beginService();
-				} else if (route == 1) {
+				} else if (rand < config.probProduce + config.probDairy) {
 					dairySP.addQueue(a);
 					if (!dairySP.isReserved()) dairySP.beginService();
-				} else if (route == 2) {
+				} else if (rand < config.probProduce + config.probDairy + config.probGrocery) {
 					grocerySP.addQueue(a);
 					if (!grocerySP.isReserved()) grocerySP.beginService();
 				} else {
@@ -128,7 +139,6 @@ public class MyEngine extends Engine {
 				a.setCheckoutEndTime(Clock.getInstance().getTime());
 				a.reportPaymentSuccessful();
 				a.reportResults();
-
 				if (regularCheckoutSP.isOnQueue()) regularCheckoutSP.beginService();
 				break;
 
@@ -137,16 +147,16 @@ public class MyEngine extends Engine {
 				a.setCheckoutEndTime(Clock.getInstance().getTime());
 				a.reportPaymentSuccessful();
 				a.reportResults();
-
 				if (selfCheckoutSP.isOnQueue()) selfCheckoutSP.beginService();
 				break;
 		}
 	}
 
 	private void routeToCheckout(Customer a) {
+
 		a.setCheckoutStartTime(Clock.getInstance().getTime());
 
-		if (a.getItemCount() <= 10) {
+		if (a.getItemCount() <= config.selfMaxItems) {
 			selfCheckoutSP.addQueue(a);
 			if (!selfCheckoutSP.isReserved()) selfCheckoutSP.beginService();
 		} else {
