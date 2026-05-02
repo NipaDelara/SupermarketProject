@@ -1,0 +1,13 @@
+# =============================================================================
+#  TEMPLATE — copy this file to db.properties and fill in real values
+#
+#      cp src/main/resources/db.properties.example src/main/resources/db.properties
+#
+#  db.properties is in .gitignore on purpose, so each developer keeps their
+#  own credentials and we never push secrets to GitHub.
+# =============================================================================
+db.url=jdbc:mariadb://localhost:3306/supermarket_sim
+db.user=simulator
+db.password=CHANGE_ME
+
+db.connectTimeoutMs=3000
