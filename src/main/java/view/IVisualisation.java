@@ -4,7 +4,7 @@ package view;
  * Drawing surface contract used by the Controller to push visual events
  * into the supermarket animation.
  *
- * Existing methods (kept for backwards compatibility with current Controller):
+ * Original methods (kept for backwards compatibility):
  *   - clearDisplay(): wipes the canvas (called at simulation start)
  *   - newCustomer(): notifies that a new customer entered the system
  *
