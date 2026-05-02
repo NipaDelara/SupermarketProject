@@ -150,6 +150,27 @@ mariadb -u simulator -p'simpass2026' supermarket_sim -e \
 | Saturated system (queues form) | 120 | 3  | 10 |
 | Stress test (very long queues) | 60  | 1  | 5 |
 
+## A note about the database
+
+Each developer runs their **own local MariaDB**. The application connects to
+`localhost:3306`, so the `simulation_run` table on Noel's laptop is a
+different table from the one on Delara's or Dornaraj's laptop. **No data is
+shared between developers**, and that is intentional for this academic
+project: the requirement is that the program *uses* an external data
+repository, not that the team shares one.
+
+If a teammate runs the app **without** installing MariaDB, the simulator
+still works — every other feature (UI, animation, statistics) keeps
+running. The persistence step fails silently in the console with a message
+like:
+
+```
+[Controller] Could not persist run: Failed to connect to jdbc:mariadb://...
+```
+
+This is intentional graceful degradation: a broken database must never
+block the rest of the product.
+
 ## Roadmap (still open)
 - [ ] UI screen to browse historical runs from MariaDB.
 - [ ] Multi-checkout (N regular + N self) in the engine.
