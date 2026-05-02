@@ -31,6 +31,13 @@ Thumbs.db
 *.swp
 
 # =========================
+# Local DB credentials (Noel)
+# Each developer copies db.properties.example → db.properties
+# and fills in their own values. Never commit the real one.
+# =========================
+src/main/resources/db.properties
+
+# =========================
 # Eclipse (optional cleanup)
 # =========================
 .metadata/
