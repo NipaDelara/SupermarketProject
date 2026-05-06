@@ -57,7 +57,8 @@ public final class DatabaseConnection {
 
     private static synchronized void ensureLoaded() {
         if (loaded) return;
-        try (InputStream in = DatabaseConnection.class.getResourceAsStream(PROPERTIES_FILE)) {
+        try (InputStream in =
+                     DatabaseConnection.class.getResourceAsStream(PROPERTIES_FILE)) {
             if (in == null) {
                 throw new IllegalStateException(
                         "Cannot find " + PROPERTIES_FILE + " on classpath. " +
@@ -66,7 +67,8 @@ public final class DatabaseConnection {
             PROPS.load(in);
             loaded = true;
         } catch (IOException e) {
-            throw new IllegalStateException("Could not load " + PROPERTIES_FILE, e);
+            throw new IllegalStateException(
+                    "Could not load " + PROPERTIES_FILE, e);
         }
     }
 }

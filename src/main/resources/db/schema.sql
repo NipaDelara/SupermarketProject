@@ -1,7 +1,7 @@
 -- ============================================================================
 --  Supermarket Simulator - MariaDB schema
 --  Run once on a fresh database:
---      mariadb -u simulator -p supermarket_sim < schema.sql
+--      MariaDB -u simulator -p supermarket_sim < schema.sql
 -- ============================================================================
 
 -- Make the script idempotent: if you re-run, drop in dependency order first.

@@ -21,6 +21,10 @@ public class MyEngine extends Engine {
 	private final ServicePoint regularCheckoutSP;
 	private final ServicePoint selfCheckoutSP;
 
+    private int regularCheckoutCustomers = 0;
+	private int selfCheckoutCustomers = 0;
+	private int exitCustomers = 0;
+
 	public MyEngine(IControllerMtoV controller, SimulationConfig config	) {
 		super(controller);
 		this.config = config;
@@ -55,20 +59,13 @@ public class MyEngine extends Engine {
 		arrivalProcess = new ArrivalProcess(arrivalGen, eventList, EventType.ARR1);
 	}
 
-	public void setServicePointDistribution(int idx, String distType, double... params) {
-		if (idx < 0 || idx >= servicePoints.length) return;
-
-		ContinuousGenerator newGen = createGenerator(distType, params);
-		servicePoints[idx].setGenerator(newGen);
-	}
-
 	private ContinuousGenerator createGenerator(String type, double... params) {
-        return switch (type.toLowerCase()) {
-            case "negexp" -> new Negexp(params[0]);
-            case "normal" -> new Normal(params[0], params[1]);
-            case "uniform" -> new Uniform(params[0], params[1]);
-            default -> new Negexp(10); // fallback
-        };
+		return switch (type.toLowerCase()) {
+			case "negexp" -> new Negexp(params[0]);
+			case "normal" -> new Normal(params[0], params[1]);
+			case "uniform" -> new Uniform(params[0], params[1]);
+			default -> new Negexp(10); // fallback
+		};
 	}
 
 	@Override
@@ -136,18 +133,41 @@ public class MyEngine extends Engine {
 
 			case DEP_REGULAR_CHECKOUT:
 				a = regularCheckoutSP.removeQueue();
+				if (a == null) {
+					System.err.println("Warning: regular checkout departure event but queue was empty.");
+					break;
+				}
+				regularCheckoutCustomers = Math.max(0, regularCheckoutCustomers - 1);
+				exitCustomers++;
+
 				a.setCheckoutEndTime(Clock.getInstance().getTime());
 				a.reportPaymentSuccessful();
 				a.reportResults();
-				if (regularCheckoutSP.isOnQueue()) regularCheckoutSP.beginService();
+				updateVisuals();
+				if (regularCheckoutSP.isOnQueue()) {
+					regularCheckoutSP.beginService();
+				}
 				break;
 
 			case DEP_SELF_CHECKOUT:
 				a = selfCheckoutSP.removeQueue();
+				if (a == null) {
+					System.err.println("Warning: self checkout departure event but queue was empty.");
+					break;
+				}
+
+				selfCheckoutCustomers = Math.max(0, selfCheckoutCustomers - 1);
+				exitCustomers++;
+
 				a.setCheckoutEndTime(Clock.getInstance().getTime());
 				a.reportPaymentSuccessful();
 				a.reportResults();
-				if (selfCheckoutSP.isOnQueue()) selfCheckoutSP.beginService();
+
+				updateVisuals();
+
+				if (selfCheckoutSP.isOnQueue()){
+					selfCheckoutSP.beginService();
+				}
 				break;
 		}
 	}
@@ -163,6 +183,19 @@ public class MyEngine extends Engine {
 			regularCheckoutSP.addQueue(a);
 			if (!regularCheckoutSP.isReserved()) regularCheckoutSP.beginService();
 		}
+	}
+	private void updateVisuals() {
+        int entranceCustomers = 0;
+        int shoppingCustomers = 0;
+        int decisionCustomers = 0;
+        controller.visualiseCustomerStages(
+                entranceCustomers,
+                shoppingCustomers,
+                decisionCustomers,
+				regularCheckoutCustomers,
+				selfCheckoutCustomers,
+				exitCustomers
+		);
 	}
 
 	@Override

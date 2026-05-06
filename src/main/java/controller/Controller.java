@@ -39,32 +39,6 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 		((Thread) engine).start();
 	}
 
-	@Override
-	public void decreaseSpeed() { //  // Slow down simulation: increase delay
-
-		if (engine != null) {
-			long newDelay = (long) (engine.getDelay() * 1.10);
-
-			// Maximum delay limit
-			engine.setDelay(Math.min(newDelay, 2000));
-
-			System.out.println("Slow down -> delay: " + engine.getDelay());
-		}
-	}
-
-	@Override
-	public void increaseSpeed() {  // Speed up simulation: decrease delay
-
-		if (engine != null) {
-			long newDelay = (long) (engine.getDelay() * 0.90);
-
-			// Minimum delay limit
-			engine.setDelay(Math.max(newDelay, 10));
-
-			System.out.println("Speed up -> delay: " + engine.getDelay());
-		}
-	}
-
 
 	/* Simulation results passing to the UI
 	 * Because FX-UI updates come from engine thread, they need to be directed to the JavaFX thread
@@ -90,7 +64,26 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 		customersSeen++;
 		Platform.runLater(() -> ui.getVisualisation().newCustomer());
 	}
+	@Override
+	public void visualiseCustomerStages(
+			int entrance,
+			int shopping,
+			int decision,
+			int regularCheckout,
+			int selfCheckout,
+			int exit
+	) {
+		customersSeen = entrance + shopping + decision + regularCheckout + selfCheckout + exit;
 
+		Platform.runLater(() -> ui.getVisualisation().showCustomerStages(
+				entrance,
+				shopping,
+				decision,
+				regularCheckout,
+				selfCheckout,
+				exit
+		));
+	}
 	// Override methods for pause,resume and step
 	@Override
 	public void pauseSimulation() {
@@ -111,6 +104,24 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 		if (engine != null) {
 			engine.stepSimulation();
 		}
+	}
+
+	@Override
+	public void resetSimulation() {
+		if (engine != null) {
+			engine.pauseSimulation();
+			engine = null;
+		}
+
+		customersSeen = 0;
+		lastConfig = null;
+
+		Platform.runLater(() -> {
+			ui.getVisualisation().clearDisplay();
+			ui.setEndingTime(0);
+		});
+
+		System.out.println("[Controller] Simulation reset.");
 	}
 
 	/* ======================== Helpers (Noel) ======================== */

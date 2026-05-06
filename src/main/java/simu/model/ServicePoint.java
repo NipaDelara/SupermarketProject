@@ -14,16 +14,17 @@ public class ServicePoint {
 	private final EventList eventList;   // Event list where the next departure event is added
 	private final EventType eventTypeScheduled;  // Departure event type for this service point
 
-	private boolean reserved = false;     // True when this service point is busy
+	private boolean reserved = true;     // True when this service point is busy
 
-	public ServicePoint(ContinuousGenerator generator, EventList tapahtumalista, EventType tyyppi){
+	public ServicePoint(ContinuousGenerator generator, EventList tapahtumalista, EventType type){
 		this.eventList = tapahtumalista;
 		this.generator = generator;
-		this.eventTypeScheduled = tyyppi;
+		this.eventTypeScheduled = type;
 				
 	}
 	// Add customer to the queue
 	public void addQueue(Customer customer) {
+
 		jono.add(customer);
 	}
 
@@ -35,6 +36,10 @@ public class ServicePoint {
 
 	// Start service for the first customer in the queue
 	public void beginService() {
+		if (jono.isEmpty() || reserved) {
+			return;
+		}
+
 		reserved = true;
 
 		double serviceTime = generator.sample();
@@ -62,7 +67,7 @@ public class ServicePoint {
 	// Check if there are customers in queue
 	public boolean isOnQueue() {
 
-		return jono.size() != 0;
+		return !jono.isEmpty();
 	}
 	// Added for statistics / GUI display
 	public int getQueueLength() {
