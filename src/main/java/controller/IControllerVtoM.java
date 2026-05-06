@@ -4,11 +4,7 @@ import simu.model.SimulationConfig;
 
 /* interface for the UI */
 public interface IControllerVtoM {
-		// public void startSimulation();
-		public void startSimulation(SimulationConfig config);
-
-		public void increaseSpeed();
-		public void decreaseSpeed();
+	public void startSimulation(SimulationConfig config);
 
     // Override methods for pause,resume and step
     void pauseSimulation();
@@ -16,4 +12,6 @@ public interface IControllerVtoM {
 	void resumeSimulation();
 
 	void stepSimulation();
+
+	void resetSimulation();
 }
