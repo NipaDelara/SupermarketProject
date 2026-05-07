@@ -79,15 +79,18 @@ public abstract class Engine extends Thread implements IEngine {  // NEW DEFINIT
 	}
 	@Override
 	public void resumeSimulation() {
-		paused = false;
 		synchronized (pauseLock) {
+			paused = false;
 			pauseLock.notifyAll();
 		}
 	}
 	@Override
 	public void stepSimulation() {
-		running = false;
-		resumeSimulation();
+		synchronized (pauseLock) {
+			stepMode = true;
+			paused = false;
+			pauseLock.notifyAll();
+		}
 	}
 
 
