@@ -19,20 +19,17 @@ public class ServicePoint {
 	public ServicePoint(ContinuousGenerator generator, EventList tapahtumalista, EventType tyyppi){
 		this.eventList = tapahtumalista;
 		this.generator = generator;
-		this.eventTypeScheduled = tyyppi;
-				
+		this.eventTypeScheduled = type;
 	}
 	// Add customer to the queue
 	public void addQueue(Customer customer) {
 		jono.add(customer);
 	}
-
 	// Remove serviced customer
 	public Customer removeQueue(){
 		reserved = false;
 		return jono.poll();
 	}
-
 	// Start service for the first customer in the queue
 	public void beginService() {
 		reserved = true;
@@ -53,16 +50,12 @@ public class ServicePoint {
 	public void setGenerator(ContinuousGenerator generator) {
 		this.generator = generator;}
 
-
-
 	public boolean isReserved(){
-
 		return reserved;
 	}
 	// Check if there are customers in queue
 	public boolean isOnQueue() {
-
-		return jono.size() != 0;
+		return !jono.isEmpty();
 	}
 	// Added for statistics / GUI display
 	public int getQueueLength() {

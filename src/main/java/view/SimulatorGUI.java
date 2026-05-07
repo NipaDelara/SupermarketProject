@@ -9,6 +9,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.*;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
@@ -29,13 +31,13 @@ import simu.framework.Trace.Level;
 
 /**
  * Application entry point and view orchestrator.
- *
+ * <p>
  * Layout (BorderPane):
  *   Top    = title bar
  *   Left   = ConfigurationPanel (builds SimulationConfig, controls run)
  *   Center = SimulatorVisualisation + status bar
  *   Right  = StatisticsPanel
- *
+ * <p>
  * Implements ISimulatorUI: forwards Controller queries to ConfigurationPanel.
  */
 public class SimulatorGUI extends Application implements ISimulatorUI {
@@ -79,6 +81,10 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
         centerBox.setAlignment(Pos.TOP_CENTER);
         centerBox.setPadding(new Insets(10));
 
+        // RESPONSIVE: let center area grow
+        VBox.setVgrow(display, Priority.ALWAYS);
+        centerBox.setFillWidth(true);
+
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(12));
         root.setBackground(new Background(new BackgroundFill(
@@ -96,7 +102,28 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
         BorderPane.setMargin(configPanel, new Insets(0, 12, 0, 0));
         BorderPane.setMargin(statsPanel,  new Insets(0, 0, 0, 12));
 
+        // RESPONSIVE: side panels keep reasonable widths
+        configPanel.setMinWidth(230);
+        configPanel.setPrefWidth(260);
+        configPanel.setMaxWidth(320);
+
+        statsPanel.setMinWidth(220);
+        statsPanel.setPrefWidth(240);
+        statsPanel.setMaxWidth(300);
+
+        // RESPONSIVE: canvas follows center space
+        display.widthProperty().bind(centerBox.widthProperty().subtract(20));
+        display.heightProperty().bind(centerBox.heightProperty().subtract(statusBox.heightProperty()).subtract(30));
+
+        // RESPONSIVE: status card follows center width
+        statusBox.maxWidthProperty().bind(centerBox.widthProperty().subtract(20));
+
         Scene scene = new Scene(root, 1180, 660);
+
+        // RESPONSIVE: prevent layout from breaking too small
+        primaryStage.setMinWidth(950);
+        primaryStage.setMinHeight(600);
+
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -143,10 +170,54 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
                 int processed = display.getCustomerCount();
                 customersLabel.setText(processed + " / " + (int) configPanel.getSimulationTime());
 
-                statsPanel.recordQueueLength(
-                        display.getRegularQueueCount() + display.getSelfQueueCount());
+                int regularQueue = display.getRegularQueueCount();
+                int selfQueue = display.getSelfQueueCount();
+                int totalQueue = regularQueue + selfQueue;
+
+                statsPanel.recordQueueLength(totalQueue);
+
+                // UPDATED: live average waiting time estimate
+                statsPanel.updateAvgWaiting(totalQueue * 1.5);
+
+                // UPDATED: live utilization estimate
+                int regularCheckouts = getRegularCheckoutCountSafe();
+                int selfCheckouts = getSelfCheckoutCountSafe();
+
+                double regularUtil = regularCheckouts > 0
+                        ? Math.min(100.0, (regularQueue * 100.0) / regularCheckouts)
+                        : 0.0;
+
+                double selfUtil = selfCheckouts > 0
+                        ? Math.min(100.0, (selfQueue * 100.0) / selfCheckouts)
+                        : 0.0;
+
+                statsPanel.updateUtilization(regularUtil, selfUtil);
+
+                // UPDATED: live throughput
+                if (running) {
+                    double elapsedHours = Math.max(
+                            (System.currentTimeMillis() - simulationStartedAt) / 1000.0 / 3600.0,
+                            0.0001
+                    );
+
+                    statsPanel.updateThroughput(processed / elapsedHours);
+                }
             }
         }.start();
+    }
+    private int getRegularCheckoutCountSafe() {
+        try {
+            return configPanel.getRegularCheckouts();
+        } catch (Exception e) {
+            return 1;
+        }
+    }
+    private int getSelfCheckoutCountSafe() {
+        try {
+            return configPanel.getSelfCheckouts();
+        } catch (Exception e) {
+            return 1;
+        }
     }
 
     private String formatMinutes(double minutes) {
