@@ -39,7 +39,6 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 		((Thread) engine).start();
 	}
 
-
 	/* Simulation results passing to the UI
 	 * Because FX-UI updates come from engine thread, they need to be directed to the JavaFX thread
 	 */

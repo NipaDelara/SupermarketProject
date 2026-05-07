@@ -14,6 +14,7 @@ public class MyEngine extends Engine {
 
 	private final ArrivalProcess arrivalProcess;
 	private final SimulationConfig config;
+
 	private final ServicePoint produceSP;
 	private final ServicePoint dairySP;
 	private final ServicePoint grocerySP;
@@ -21,9 +22,15 @@ public class MyEngine extends Engine {
 	private final ServicePoint regularCheckoutSP;
 	private final ServicePoint selfCheckoutSP;
 
-    private int regularCheckoutCustomers = 0;
+	// UPDATED: counters for visualization
+	private int entranceCustomers = 0;
+	private int shoppingCustomers = 0;
+	private int decisionCustomers = 0;
+	private int regularCheckoutCustomers = 0;
 	private int selfCheckoutCustomers = 0;
 	private int exitCustomers = 0;
+	private int regularCompleted;
+	private int selfCompleted;
 
 	public MyEngine(IControllerMtoV controller, SimulationConfig config	) {
 		super(controller);
@@ -83,6 +90,10 @@ public class MyEngine extends Engine {
 				a = new Customer(config);
 				a.setShoppingStartTime(Clock.getInstance().getTime());
 
+				// UPDATED
+				entranceCustomers++;
+				shoppingCustomers++;
+
 				// Choose shopping area using config probabilities
 				double rand = Math.random();
 				if (rand < config.probProduce) {
@@ -98,9 +109,11 @@ public class MyEngine extends Engine {
 					beveragesSP.addQueue(a);
 					if (!beveragesSP.isReserved()) beveragesSP.beginService();
 				}
-
 				arrivalProcess.generateNext();
 				controller.visualiseCustomer();
+
+				// UPDATED
+				updateVisuals();
 				break;
 
 			case DEP_PRODUCE:
@@ -138,11 +151,13 @@ public class MyEngine extends Engine {
 					break;
 				}
 				regularCheckoutCustomers = Math.max(0, regularCheckoutCustomers - 1);
+				regularCompleted++;
 				exitCustomers++;
 
 				a.setCheckoutEndTime(Clock.getInstance().getTime());
 				a.reportPaymentSuccessful();
 				a.reportResults();
+
 				updateVisuals();
 				if (regularCheckoutSP.isOnQueue()) {
 					regularCheckoutSP.beginService();
@@ -157,6 +172,7 @@ public class MyEngine extends Engine {
 				}
 
 				selfCheckoutCustomers = Math.max(0, selfCheckoutCustomers - 1);
+				selfCompleted++;
 				exitCustomers++;
 
 				a.setCheckoutEndTime(Clock.getInstance().getTime());
@@ -172,28 +188,51 @@ public class MyEngine extends Engine {
 		}
 	}
 
+	// UPDATED
+	private void finishShopping(Customer a) {
+		if (a == null) {
+			return;
+		}
+
+		shoppingCustomers = Math.max(0, shoppingCustomers - 1);
+
+		a.setShoppingEndTime(Clock.getInstance().getTime());
+
+		decisionCustomers = 1;
+		updateVisuals();
+
+		routeToCheckout(a);
+
+		decisionCustomers = 0;
+		updateVisuals();
+	}
+
 	private void routeToCheckout(Customer a) {
 
 		a.setCheckoutStartTime(Clock.getInstance().getTime());
 
 		if (a.getItemCount() <= config.selfMaxItems) {
+			selfCheckoutCustomers++;
 			selfCheckoutSP.addQueue(a);
-			if (!selfCheckoutSP.isReserved()) selfCheckoutSP.beginService();
+			if (!selfCheckoutSP.isReserved()){
+				selfCheckoutSP.beginService();
+			}
 		} else {
+			regularCheckoutCustomers++;
 			regularCheckoutSP.addQueue(a);
-			if (!regularCheckoutSP.isReserved()) regularCheckoutSP.beginService();
+
+			if (!regularCheckoutSP.isReserved()){
+				regularCheckoutSP.beginService();
+			}
 		}
 	}
 	private void updateVisuals() {
-        int entranceCustomers = 0;
-        int shoppingCustomers = 0;
-        int decisionCustomers = 0;
         controller.visualiseCustomerStages(
                 entranceCustomers,
                 shoppingCustomers,
                 decisionCustomers,
-				regularCheckoutCustomers,
-				selfCheckoutCustomers,
+				regularCheckoutCustomers + regularCompleted,
+				selfCheckoutCustomers + selfCompleted,
 				exitCustomers
 		);
 	}
