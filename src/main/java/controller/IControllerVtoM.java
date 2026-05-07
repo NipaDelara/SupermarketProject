@@ -6,7 +6,7 @@ import simu.model.SimulationConfig;
 public interface IControllerVtoM {
 	public void startSimulation(SimulationConfig config);
 
-    // Override methods for pause,resume and step
+    // Override methods for pause, resume, step and reset
     void pauseSimulation();
 
 	void resumeSimulation();

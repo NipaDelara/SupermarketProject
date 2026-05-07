@@ -21,16 +21,4 @@ public interface IVisualisation {
 
     /** A customer finished service and exited. true=regular, false=self. */
     default void customerLeft(boolean regular) { /* default no-op */ }
-
-
-    default void showCustomerStages(
-            int entrance,
-            int shopping,
-            int decision,
-            int regularCheckout,
-            int selfCheckout,
-            int exit
-    ) {
-        // default no-op
-    }
 }

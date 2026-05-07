@@ -26,7 +26,7 @@ import simu.model.SimulationConfig;
 /**
  * Left-hand panel of the simulator: lets the user configure simulation
  * parameters and control the run (Start / Pause / Resume / Step / Reset).
- * <p>
+ *
  * Builds a {@link SimulationConfig} from its fields when Start is pressed
  * and forwards it to the Controller. Fields that the simple UI does not
  * expose keep the SimulationConfig default values, so we still get a valid
@@ -40,7 +40,7 @@ public class ConfigurationPanel extends VBox {
     private final TextField regularCheckoutsField;
     private final TextField selfCheckoutsField;
     private final TextField selfMaxItemsField;
-    private final Slider speedSlider;
+    private final Slider    speedSlider;
 
     private final Button startButton;
     private final Button pauseButton;
@@ -86,16 +86,14 @@ public class ConfigurationPanel extends VBox {
         stepButton   = primaryButton("Step",   "#a78bfa", "#4c1d95");
         resetButton  = primaryButton("Reset",  "#f87171", "#7f1d1d");
 
-        // UPDATED: initial button states
+        // Initial button states: only Start is enabled
         pauseButton.setDisable(true);
         resumeButton.setDisable(true);
         stepButton.setDisable(true);
         resetButton.setDisable(true);
 
-        // UPDATED: Start action
         startButton.setOnAction(e -> {
             controller.startSimulation(buildSimulationConfig());
-
             startButton.setDisable(true);
             pauseButton.setDisable(false);
             resumeButton.setDisable(true);
@@ -103,40 +101,32 @@ public class ConfigurationPanel extends VBox {
             resetButton.setDisable(false);
         });
 
-        // UPDATED: Pause action
         pauseButton.setOnAction(e -> {
             controller.pauseSimulation();
-
             pauseButton.setDisable(true);
             resumeButton.setDisable(false);
             stepButton.setDisable(false);
             resetButton.setDisable(false);
         });
 
-        // UPDATED: Resume action
         resumeButton.setOnAction(e -> {
             controller.resumeSimulation();
-
             pauseButton.setDisable(false);
             resumeButton.setDisable(true);
             stepButton.setDisable(true);
             resetButton.setDisable(false);
         });
 
-        // UPDATED: Step action
         stepButton.setOnAction(e -> {
             controller.stepSimulation();
-
             pauseButton.setDisable(true);
             resumeButton.setDisable(false);
             stepButton.setDisable(false);
             resetButton.setDisable(false);
         });
 
-        // UPDATED: Reset action
         resetButton.setOnAction(e -> {
             controller.resetSimulation();
-
             startButton.setDisable(false);
             pauseButton.setDisable(true);
             resumeButton.setDisable(true);
@@ -144,11 +134,11 @@ public class ConfigurationPanel extends VBox {
             resetButton.setDisable(true);
         });
 
-        startButton.setMaxWidth(Double.MAX_VALUE);
-        pauseButton.setMaxWidth(Double.MAX_VALUE);
+        startButton .setMaxWidth(Double.MAX_VALUE);
+        pauseButton .setMaxWidth(Double.MAX_VALUE);
         resumeButton.setMaxWidth(Double.MAX_VALUE);
-        stepButton.setMaxWidth(Double.MAX_VALUE);
-        resetButton.setMaxWidth(Double.MAX_VALUE);
+        stepButton  .setMaxWidth(Double.MAX_VALUE);
+        resetButton .setMaxWidth(Double.MAX_VALUE);
 
         HBox row1 = new HBox(8, startButton, pauseButton);
         HBox row2 = new HBox(8, resumeButton, stepButton);
@@ -184,29 +174,21 @@ public class ConfigurationPanel extends VBox {
         c.arrivalMean   = parseDoubleSafe(arrivalMeanField,   c.arrivalMean);
         c.arrivalStd    = parseDoubleSafe(arrivalStdField,    c.arrivalStd);
         c.selfMaxItems  = (int) parseDoubleSafe(selfMaxItemsField, c.selfMaxItems);
-        // Note: regular/self-checkout COUNT fields are read by buildSimulationConfig
+        // Note: regular/self checkout COUNT fields are read by buildSimulationConfig
         // but the engine only uses 1 instance of each. When Dornaraj enables N
         // checkouts in MyEngine, he can pull these from c. (Stored in notes for now.)
         return c;
     }
 
-    public double getSimulationTime(){
-        return parseDoubleSafe(simulationTimeField, 480);
-    }
-    public long   getDelay(){
-        return (long) speedSlider.getValue();
-    }
-    public int    getRegularCheckouts(){
-        return (int) parseDoubleSafe(regularCheckoutsField,3);
-    }
-    public int    getSelfCheckouts(){
-        return (int) parseDoubleSafe(selfCheckoutsField, 4);
-    }
+    public double getSimulationTime() { return parseDoubleSafe(simulationTimeField, 480); }
+    public long   getDelay()          { return (long) speedSlider.getValue(); }
+    public int    getRegularCheckouts() { return (int) parseDoubleSafe(regularCheckoutsField, 3); }
+    public int    getSelfCheckouts()    { return (int) parseDoubleSafe(selfCheckoutsField,    4); }
 
-    /** Re-enable Start (called from SimulatorGUI when the run finishes). */
+    /** Re-enable Start and reset all buttons (called from SimulatorGUI when the run finishes). */
     public void onSimulationFinished() {
         startButton.setDisable(false);
-        pauseButton.setDisable(true);  // UPDATED: reset buttons when simulation finishes
+        pauseButton.setDisable(true);
         resumeButton.setDisable(true);
         stepButton.setDisable(true);
         resetButton.setDisable(true);
@@ -243,11 +225,8 @@ public class ConfigurationPanel extends VBox {
         return b;
     }
 
-    private static double parseDoubleSafe(TextField tf, double fallback){
-        try {
-            return Double.parseDouble(tf.getText().trim());
-        }catch (NumberFormatException ex) {
-            return fallback;
-        }
+    private static double parseDoubleSafe(TextField tf, double fallback) {
+        try { return Double.parseDouble(tf.getText().trim()); }
+        catch (NumberFormatException ex) { return fallback; }
     }
 }

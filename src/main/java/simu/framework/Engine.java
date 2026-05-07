@@ -79,15 +79,18 @@ public abstract class Engine extends Thread implements IEngine {  // NEW DEFINIT
 	}
 	@Override
 	public void resumeSimulation() {
-		paused = false;
 		synchronized (pauseLock) {
+			paused = false;
 			pauseLock.notifyAll();
 		}
 	}
 	@Override
 	public void stepSimulation() {
-		running = false;
-		resumeSimulation();
+		synchronized (pauseLock) {
+			stepMode = true;
+			paused = false;
+			pauseLock.notifyAll();
+		}
 	}
 
 
@@ -99,7 +102,7 @@ public abstract class Engine extends Thread implements IEngine {  // NEW DEFINIT
 
 	private void tryCEvents() {    // define protected, if you want to overwrite
 		for (ServicePoint p: servicePoints){
-			if (p.isReserved() && p.isOnQueue()){
+			if (!p.isReserved() && p.isOnQueue()){
 				p.beginService();
 			}
 		}

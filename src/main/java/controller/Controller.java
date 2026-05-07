@@ -39,6 +39,20 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 		((Thread) engine).start();
 	}
 
+	// Legacy speed helpers (no longer part of IControllerVtoM; speed is slider-driven)
+	public void decreaseSpeed() {
+		if (engine != null) {
+			engine.setDelay(Math.min((long) (engine.getDelay() * 1.10), 2000));
+		}
+	}
+
+	public void increaseSpeed() {
+		if (engine != null) {
+			engine.setDelay(Math.max((long) (engine.getDelay() * 0.90), 10));
+		}
+	}
+
+
 	/* Simulation results passing to the UI
 	 * Because FX-UI updates come from engine thread, they need to be directed to the JavaFX thread
 	 */
@@ -63,26 +77,7 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 		customersSeen++;
 		Platform.runLater(() -> ui.getVisualisation().newCustomer());
 	}
-	@Override
-	public void visualiseCustomerStages(
-			int entrance,
-			int shopping,
-			int decision,
-			int regularCheckout,
-			int selfCheckout,
-			int exit
-	) {
-		customersSeen = entrance + shopping + decision + regularCheckout + selfCheckout + exit;
 
-		Platform.runLater(() -> ui.getVisualisation().showCustomerStages(
-				entrance,
-				shopping,
-				decision,
-				regularCheckout,
-				selfCheckout,
-				exit
-		));
-	}
 	// Override methods for pause,resume and step
 	@Override
 	public void pauseSimulation() {
