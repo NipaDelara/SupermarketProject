@@ -12,11 +12,11 @@ import java.util.Map;
 
 /**
  * Data access object for {@link SimulationRun} entities.
- * <p>
+ *
  * Two tables involved:
  *   - simulation_run         : one row per run (input + headline output)
  *   - simulation_run_metric  : N rows per run (avg waiting, throughput, …)
- * <p>
+ *
  * Inserts are wrapped in a single transaction so a partial save can never
  * leave the run without its metrics or vice-versa.
  */

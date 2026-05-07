@@ -16,7 +16,7 @@ public class ServicePoint {
 
 	private boolean reserved = false;     // True when this service point is busy
 
-	public ServicePoint(ContinuousGenerator generator, EventList tapahtumalista, EventType type){
+	public ServicePoint(ContinuousGenerator generator, EventList tapahtumalista, EventType tyyppi){
 		this.eventList = tapahtumalista;
 		this.generator = generator;
 		this.eventTypeScheduled = type;
@@ -32,10 +32,6 @@ public class ServicePoint {
 	}
 	// Start service for the first customer in the queue
 	public void beginService() {
-		if (jono.isEmpty() || reserved) {
-			return;
-		}
-
 		reserved = true;
 
 		double serviceTime = generator.sample();
