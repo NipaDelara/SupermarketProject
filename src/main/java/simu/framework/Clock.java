@@ -5,6 +5,7 @@ public class Clock {
 	private static Clock instance;
 	
 	private Clock(){
+
 		time = 0;
 	}
 	
@@ -16,10 +17,12 @@ public class Clock {
 	}
 	
 	public void setTime(double time){
+
 		this.time = time;
 	}
 
 	public double getTime(){
+
 		return time;
 	}
 }

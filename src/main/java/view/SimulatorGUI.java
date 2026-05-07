@@ -163,8 +163,8 @@ public class SimulatorGUI extends Application implements ISimulatorUI {
                 if (endingTime > 0.0) {
                     clockLabel.setText(formatMinutes(endingTime));
                 } else if (running) {
-                    double elapsedSec = (System.currentTimeMillis() - simulationStartedAt) / 1000.0;
-                    clockLabel.setText(formatMinutes(elapsedSec));
+                    double elapsedMinutes  = (System.currentTimeMillis() - simulationStartedAt) / 1000.0 /60.0 ;
+                    clockLabel.setText(formatMinutes(elapsedMinutes ));
                 }
 
                 int processed = display.getCustomerCount();
