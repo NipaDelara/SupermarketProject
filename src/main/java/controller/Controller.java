@@ -7,8 +7,9 @@ import simu.framework.IEngine;
 import simu.model.MyEngine;
 import simu.model.SimulationConfig;
 import view.ISimulatorUI;
-
+import simu.framework.Clock;
 import java.sql.SQLException;
+
 
 public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 	private IEngine engine;
@@ -28,14 +29,23 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 
 	@Override
 	public void startSimulation(SimulationConfig config) {
+
+		// Prevent starting multiple simulations
+		if (engine != null) {
+			return;
+		}
+		Clock.getInstance().setTime(0.0);
 		// Remember the config so showEndTime can persist it (Noel)
 		this.lastConfig = config;
 		this.customersSeen = 0;
 
 		engine = new MyEngine(this, config);  // pass config
+
 		engine.setSimulationTime(ui.getTime());
 		engine.setDelay(ui.getDelay());
+
 		ui.getVisualisation().clearDisplay();
+
 		((Thread) engine).start();
 	}
 
@@ -69,6 +79,7 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 		} catch (Exception ex) {
 			System.err.println("[Controller] Could not persist run: " + ex.getMessage());
 		}
+		engine = null;
 	}
 
 	@Override
