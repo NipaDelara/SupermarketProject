@@ -88,7 +88,26 @@ public class Controller implements IControllerVtoM, IControllerMtoV {   // NEW
 		customersSeen++;
 		Platform.runLater(() -> ui.getVisualisation().newCustomer());
 	}
+	@Override
+	public void visualiseCustomerStages(
+			int entrance,
+			int shopping,
+			int decision,
+			int regularCheckout,
+			int selfCheckout,
+			int exit
+	) {
+		customersSeen = entrance + shopping + decision + regularCheckout + selfCheckout + exit;
 
+		Platform.runLater(() -> ui.getVisualisation().showCustomerStages(
+				entrance,
+				shopping,
+				decision,
+				regularCheckout,
+				selfCheckout,
+				exit
+		));
+	}
 	// Override methods for pause,resume and step
 	@Override
 	public void pauseSimulation() {

@@ -19,7 +19,7 @@ public class ServicePoint {
 	public ServicePoint(ContinuousGenerator generator, EventList tapahtumalista, EventType tyyppi){
 		this.eventList = tapahtumalista;
 		this.generator = generator;
-		this.eventTypeScheduled = type;
+		this.eventTypeScheduled = tyyppi;
 	}
 	// Add customer to the queue
 	public void addQueue(Customer customer) {

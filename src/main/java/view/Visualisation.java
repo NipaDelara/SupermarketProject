@@ -30,4 +30,20 @@ public class Visualisation extends Canvas implements IVisualisation {
 			j += 10;
 		}
 	}
+
+	@Override
+	public void showCustomerStages(
+			int entrance,
+			int shopping,
+			int decision,
+			int regularCheckout,
+			int selfCheckout,
+			int exit
+	) {
+		clearDisplay();
+
+		for (int i = 0; i < shopping; i++) {
+			newCustomer();
+		}
+	}
 }
