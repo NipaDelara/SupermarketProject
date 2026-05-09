@@ -29,4 +29,19 @@ public class Visualisation2 extends Canvas implements IVisualisation {
 		gc.setFont(new Font(20));
 		gc.fillText("Customer " + customerCount, 100, 100);
 	}
+	@Override
+	public void showCustomerStages(
+			int entrance,
+			int shopping,
+			int decision,
+			int regularCheckout,
+			int selfCheckout,
+			int exit
+	) {
+		clearDisplay();
+
+		for (int i = 0; i < shopping; i++) {
+			newCustomer();
+		}
+	}
 }
